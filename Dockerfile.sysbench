@@ -1,0 +1,7 @@
+FROM ethereum/client-go:v1.13.8
+
+RUN apk update && apk add sysbench
+
+RUN sysbench fileio --file-test-mode=rndrw --file-io-mode=async --file-total-size=15G --time=300 --max-requests=0 prepare
+
+ENTRYPOINT ["sysbench"]

@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  sysbench:
+    image: kiwi/sysbench:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile.sysbench
+    restart: unless-stopped
+    stop_signal: SIGINT
+    stop_grace_period: "3m"
+    command:
+      - fileio
+      - --file-test-mode=rndrw
+      - --file-io-mode=async
+      - --file-total-size=15G
+      - --time=300 
+      - --max-requests=0
+      - run
+    deploy:
+      resources:
+        limits:
+          memory: "64000m"
+    memswap_limit: "64000m"
+    logging:
+      driver: json-file
+      options:
+        max-size: "2m"
+        max-file: 10
+  fio:
+    image: kiwi/fio:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile.fio
+    restart: unless-stopped
+    stop_signal: SIGINT
+    stop_grace_period: "3m"
+    command:
+      - --direct=1
+      - --iodepth=128
+      - --rw=randrw
+      - --ioengine=libaio
+      - --bs=4k
+      - --size=1G
+      - --numjobs=1
+      - --runtime=1000
+      - --group_reporting
+      - --filename=iotest
+      - --name=randrw_test
+    deploy:
+      resources:
+        limits:
+          memory: "64000m"
+    memswap_limit: "64000m"
+    logging:
+      driver: json-file
+      options:
+        max-size: "2m"
+        max-file: 10
